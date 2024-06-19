@@ -1,2 +1,2 @@
 # dds-project
-DDS Project
+Project for Dependable Distributed Systems course
