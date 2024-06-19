@@ -1,0 +1,8 @@
+name: dds-project
+
+services:
+  node:
+    build:
+      context: .
+    network_mode: host
+    user: 1000:1000
