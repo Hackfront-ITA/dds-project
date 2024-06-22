@@ -7,7 +7,7 @@ from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST
 from threading import Thread
 
 BUF_SIZE = 128
-NET_IPS = '10.173.0.0/16'
+NET_IPS = '172.21.0.0/16'
 BC_PORT = 4678
 bc_addr = str(IPv4Network(NET_IPS, False).broadcast_address)
 

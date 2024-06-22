@@ -4,5 +4,20 @@ services:
   node:
     build:
       context: .
-    network_mode: host
+    deploy:
+      mode: replicated
+      replicas: 3
+    networks:
+      - standard
     user: 1000:1000
+
+networks:
+  standard:
+    enable_ipv6: false
+    internal: true
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16
+          ip_range: 172.21.0.0/16
+    name: 'standard'

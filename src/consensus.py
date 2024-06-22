@@ -5,8 +5,9 @@ from event_emitter import EventEmitter
 from network import BestEffortBroadcast
 
 PROCESSES = set([
-    '10.173.2.1',
-    '10.173.2.4'
+    '172.21.0.2',
+    '172.21.0.3',
+    '172.21.0.4',
 ])
 K_N = len(PROCESSES)
 CLASS_ID = '0c84640d'
