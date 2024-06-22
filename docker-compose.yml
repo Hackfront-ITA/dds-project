@@ -6,7 +6,8 @@ services:
       context: .
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: ${DDS_NUM_HOSTS}
+    env_file: '.env'
     networks:
       - standard
     user: 1000:1000
@@ -18,6 +19,6 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.21.0.0/16
-          ip_range: 172.21.0.0/16
+        - subnet: ${DDS_NETWORK}
+          ip_range: ${DDS_NETWORK}
     name: 'standard'

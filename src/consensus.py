@@ -4,13 +4,9 @@ from secrets import token_hex
 from event_emitter import EventEmitter
 from network import BestEffortBroadcast
 
-PROCESSES = set([
-    '172.21.0.2',
-    '172.21.0.3',
-    '172.21.0.4',
-])
-K_N = len(PROCESSES)
-CLASS_ID = '0c84640d'
+from config import network, num_hosts, processes
+
+CLASS_ID = 'consensus'
 
 ALLOWED_PACKETS = [
     'proposal',
@@ -18,7 +14,7 @@ ALLOWED_PACKETS = [
 ]
 
 instances = {}
-correct = set(PROCESSES)
+correct = set(processes)
 
 logger = getLogger(__name__)
 
@@ -35,13 +31,13 @@ class FloodingConsensus(EventEmitter):
         self.round = 1
         self.decision = None
 
-        self.receivedfrom = [ None ] * K_N
-        for i in range(0, K_N):
+        self.receivedfrom = [ None ] * num_hosts
+        for i in range(0, num_hosts):
             self.receivedfrom[i] = set()
-        self.receivedfrom[0] = set(PROCESSES)
+        self.receivedfrom[0] = set(processes)
 
-        self.proposals = [ None ] * K_N
-        for i in range(0, K_N):
+        self.proposals = [ None ] * num_hosts
+        for i in range(0, num_hosts):
             self.proposals[i] = set()
 
         self.on('propose', on_propose)

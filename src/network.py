@@ -6,15 +6,15 @@ from json import dumps, loads
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_BROADCAST
 from threading import Thread
 
+from config import network, port
+
 BUF_SIZE = 128
-NET_IPS = '172.21.0.0/16'
-BC_PORT = 4678
-bc_addr = str(IPv4Network(NET_IPS, False).broadcast_address)
+bc_addr = str(IPv4Network(network, False).broadcast_address)
 
 def send_handler(_, data):
     payload = dumps(data).encode('ascii')
 
-    sock.sendto(payload, (bc_addr, BC_PORT))
+    sock.sendto(payload, (bc_addr, port))
 
 def recv_handler(_):
     global running, sock
@@ -32,18 +32,17 @@ logger = logging.getLogger(__name__)
 
 sock = socket(AF_INET, SOCK_DGRAM)
 sock.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-sock.bind((bc_addr, BC_PORT))
 
 running = True
 recv_thread = Thread(target=recv_handler, args=( None, ))
-
 
 BestEffortBroadcast = EventEmitter()
 BestEffortBroadcast.on('send', send_handler)
 
 def net_start():
-    global recv_thread, running
+    global sock, recv_thread, running
 
+    sock.bind((bc_addr, port))
     recv_thread.start()
 
 def net_stop():
