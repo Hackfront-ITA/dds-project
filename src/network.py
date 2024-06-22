@@ -23,7 +23,7 @@ def recv_handler(_):
 
     while running:
         msg = sock.recvfrom(BUF_SIZE)
-        logger.debug(f'Received message from {msg[1][0]}:{msg[1][1]}: {msg[0]}')
+        # logger.debug(f'Received message from {msg[1][0]}:{msg[1][1]}: {msg[0]}')
 
         payload = loads(msg[0])
         BestEffortBroadcast.trigger('receive', msg[1], payload)

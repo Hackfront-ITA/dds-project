@@ -67,7 +67,7 @@ def on_proposal(c, p, r, ps):
     logger.debug(f'[{c.id}] Received proposals from {p} round {r}: {ps}')
 
     c.receivedfrom[r].add(p)
-    c.proposals[r].union(ps)
+    c.proposals[r] = c.proposals[r].union(ps)
 
     if correct <= c.receivedfrom[c.round] and c.decision == None:
         c.trigger('e_correct_in_receivedfrom')
@@ -103,6 +103,11 @@ def on_decided(c, p, v):
     beb.trigger('send', [ c.id, 'decided', c.decision ])
     c.trigger('decide', c.decision)
 
+
+def c_choose(proposals):
+    logger.debug(f'Deciding from {proposals}')
+
+    return min(proposals)
 
 def on_receive(_, source, payload):
     if payload[0] not in instances:
