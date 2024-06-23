@@ -25,6 +25,9 @@ def recv_handler(_):
         msg = sock.recvfrom(BUF_SIZE)
         # logger.debug(f'Received message from {msg[1][0]}:{msg[1][1]}: {msg[0]}')
 
+        if msg[0] == b'stop':
+            continue
+
         payload = loads(msg[0])
         BestEffortBroadcast.trigger('receive', msg[1], payload)
 
@@ -40,13 +43,14 @@ BestEffortBroadcast = EventEmitter()
 BestEffortBroadcast.on('send', send_handler)
 
 def net_start():
-    global sock, recv_thread, running
+    global recv_thread, running, sock
 
     sock.bind((bc_addr, port))
     recv_thread.start()
 
 def net_stop():
-    global recv_thread, running
+    global recv_thread, running, sock
 
     running = False
+    sock.sendto(b'stop', (bc_addr, port))
     recv_thread.join()
