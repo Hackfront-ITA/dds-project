@@ -5,8 +5,10 @@ from blspy import AugSchemeMPL, PrivateKey, G1Element, G2Element
 SK_SEED_SIZE = 64
 scheme = AugSchemeMPL
 
-def tss_gen_private_key() -> PrivateKey:
-    seed = token_bytes(SK_SEED_SIZE)
+def tss_gen_private_key(seed=None) -> PrivateKey:
+    if seed == None:
+        seed = token_bytes(SK_SEED_SIZE)
+
     return scheme.key_gen(seed)
 
 def tss_get_public_key(private_key: PrivateKey) -> G1Element:
