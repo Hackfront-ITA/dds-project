@@ -1,9 +1,31 @@
 from os import environ
 
+from tss import tss_gen_private_key, tss_get_public_key
+
+SEED_PREFIX = '1234567890_1234567890_1234567890_'
+
 log_level = environ['DDS_LOG_LEVEL']
 network = environ['DDS_NETWORK']
 port = int(environ['DDS_PORT'])
 num_hosts = int(environ['DDS_NUM_HOSTS'])
 
 net_prefix = '.'.join(network.split('.')[:-1])
-processes = set([ f'{net_prefix}.{num}' for num in range(2, num_hosts + 2) ])
+processes = set([
+    f'{net_prefix}.{num}'
+    for num in range(2, num_hosts + 2)
+])
+
+cur_process = '172.21.0.3'
+
+keys = {}
+
+for process in processes:
+    keys[process] = [ None, None ]
+
+    seed = (SEED_PREFIX + process).encode('ascii')
+    private_key = tss_gen_private_key(seed)
+
+    if process == cur_process:
+        keys[process][0] = private_key
+
+    keys[process][1] = tss_get_public_key(private_key)
