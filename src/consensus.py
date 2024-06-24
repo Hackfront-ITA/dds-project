@@ -1,12 +1,11 @@
 from logging import getLogger
-from secrets import token_hex
 
 from event_emitter import EventEmitter
 from network import BestEffortBroadcast
 
 from config import network, num_hosts, processes
 
-CLASS_ID = 'consensus'
+CLASS_ID = 'fl-cs'
 
 ALLOWED_PACKETS = [
     'proposal',
@@ -17,7 +16,6 @@ instances = {}
 correct = set(processes)
 
 logger = getLogger(__name__)
-
 beb = BestEffortBroadcast
 # pfd = PerfectFailureDetector
 
@@ -116,9 +114,10 @@ def on_receive(_, source, payload):
         return
 
     sender = source[0]
+    type = payload[1].replace('-', '_')
     args = payload[2:]
 
-    instance.trigger(f'm_{payload[1]}', sender, *args)
+    instance.trigger(f'm_{type}', sender, *args)
 
 beb.on('receive', on_receive)
 # pfd.on('crash', on_crash)
