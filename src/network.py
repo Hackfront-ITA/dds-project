@@ -8,7 +8,7 @@ from threading import Thread
 
 from config import network, port
 
-BUF_SIZE = 2048
+BUF_SIZE = 16384
 bc_addr = str(IPv4Network(network, False).broadcast_address)
 
 def send_handler(_, data):
