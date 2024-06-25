@@ -2,8 +2,9 @@ from logging import getLogger
 
 from event_emitter import EventEmitter
 from network import BestEffortBroadcast
+from tss import tss_share_sign, tss_share_verify, tss_combine, tss_verify
 
-from config import keys, processes
+from config import cur_process, keys, num_hosts, processes
 
 CLASS_ID = 'ac-cf'
 
@@ -15,7 +16,7 @@ ALLOWED_PACKETS = [
 
 instances = {}
 
-max_failures = floor(num_hosts / 3)
+max_failures = num_hosts - 1
 
 logger = getLogger(__name__)
 beb = BestEffortBroadcast
@@ -53,58 +54,74 @@ class AccountableConfirmer(EventEmitter):
         self.on('m_full_certificate', on_full_certificate)
 
 def on_submit_l(instance, value):
+    logger.debug(f'[{instance.id}] Submitting value {value}')
+
     instance.value = value
 
-    share = tss_share_sign()
-    id = instance.id.hex()
-    raw = bytes('submit' + value + share, 'utf8')
+    raw = str(value)
+    share = tss_share_sign(raw, keys[cur_process][0])
+
+    raw = 'submit' + str(value) + share
     sig = tss_share_sign(raw, keys[cur_process][0])
 
-    beb.trigger('send', [ id, 'submit', value, share, sig ])
+    beb.trigger('send', [ instance.id, 'submit', value, share, sig ])
 
 def on_submit_r(instance, sender, value, share, sig):
-    raw = bytes('submit' + value + share, 'utf8')
+    logger.debug(f'[{instance.id}] Received submission from {sender}, for {value}')
+
+    raw = 'submit' + str(value) + share
     if not tss_share_verify(raw, keys[sender][1], sig):
         return
 
-    if not tss_share_verify(value, keys[sender][1], share):
+    if not tss_share_verify(str(value), keys[sender][1], share):
         return
 
     if value != instance.value:
         return
 
-    if process in instance.xfrom:
+    if sender in instance.xfrom:
         return
 
-    instance.xfrom.append(process)
-    if len(instance.xfrom) >= num_hosts - max_failures:
-        instance.trigger('e_from_over_th')
+    instance.xfrom.append(sender)
 
     instance.light_cert.append((sender, share))
     instance.full_cert.append((sender, 'submit', value, share, sig))
 
+    if len(instance.xfrom) >= num_hosts - max_failures:
+        instance.trigger('e_from_over_th')
+
 def on_from_over_th(instance):
+    logger.debug(f'[{instance.id}] Receive threshold triggered')
+
     instance.confirmed = True
-    instance.trigger('confirm', value)
+    instance.trigger('confirm', instance.value)
 
-    combined = tss_combine(instance.light_cert)
-    beb.trigger('send', ('light-certificate', instance.value, combined))
+    senders, shares = zip(*instance.light_cert)
+    combined = tss_combine(shares)
+    beb.trigger('send', [ instance.id, 'light-certificate', instance.value, combined, senders ])
 
-def on_light_certificate(instance, sender, value, light_cert):
-    if not light_cert_valid(light_cert, value):
+def on_light_certificate(instance, sender, value, light_cert, processes):
+    logger.debug(f'[{instance.id}] Received light certificate from {sender}, for {value}, content: {light_cert}, {processes}')
+
+    pk = []
+    for process in processes:
+        pk.append(keys[process][1])
+
+    if not tss_verify([ str(value) ] * len(processes), pk, light_cert):
         return
 
     instance.obt_light_certs.append(('light-certificate', value, light_cert))
 
-    for entry in light_cert:
-        process = entry[0]
+    for process in processes:
         instance.lc_dict[process] += 1
 
         if instance.lc_dict[process] >= 2 and instance.confirmed and not instance.fc_sent:
             instance.fc_sent = True
-            beb.trigger('send', [ 'full-certificate', instance.value, instance.full_cert ])
+            beb.trigger('send', [ instance.id, 'full-certificate', instance.value, instance.full_cert ])
 
 def on_full_certificate(instance, sender, value, full_cert):
+    logger.debug(f'[{instance.id}] Received full certificate from {sender}, for {value}, content: {full_cert}')
+
     if not full_cert_valid(full_cert, value):
         return
 
@@ -147,9 +164,16 @@ def on_receive(_, source, payload):
 
 beb.on('receive', on_receive)
 
+def full_cert_valid(full_cert, val):
+    for entry in full_cert:
+        sender, _, value, share, sig = entry
 
-def light_cert_valid():
-    pass
+        raw = 'submit' + str(value) + share
+        if not tss_share_verify(raw, keys[sender][1], sig):
+            return False
 
-def full_cert_valid():
-    pass
+        if not tss_share_verify(str(value), keys[sender][1], share):
+            return False
+
+        if value != val:
+            return False
