@@ -14,14 +14,34 @@ def tss_gen_private_key(seed=None) -> PrivateKey:
 def tss_get_public_key(private_key: PrivateKey) -> G1Element:
     return private_key.get_g1()
 
-def tss_share_sign(message: bytes, sk: PrivateKey) -> G2Element:
-    return scheme.sign(sk, message)
+def tss_share_sign(message: str, sk: PrivateKey) -> str:
+    message = bytes(message, 'utf8')
+    result = scheme.sign(sk, message)
 
-def tss_share_verify(message: bytes, vk: G1Element, partial_sig: G2Element):
+    return str(result)
+
+def tss_share_verify(message: str, vk: G1Element, partial_sig: str) -> bool:
+    message = bytes(message, 'utf8')
+    partial_sig = G2Element.from_bytes(bytes.fromhex(partial_sig))
+
     return scheme.verify(vk, message, partial_sig)
 
-def tss_combine(partial_sigs: list[G2Element]) -> G2Element:
-    return scheme.aggregate(partial_sigs)
+def tss_combine(partial_sigs: list[str]) -> str:
+    tmp = [ None ] * len(partial_sigs)
 
-def tss_verify(messages: list[bytes], pk: list[G1Element], threshold_sig: G2Element) -> bool:
-    return scheme.aggregate_verify(pk, messages, threshold_sig)
+    for i in range(0, len(partial_sigs)):
+        tmp[i] = G2Element.from_bytes(bytes.fromhex(partial_sigs[i]))
+
+    result = scheme.aggregate(tmp)
+
+    return str(result)
+
+def tss_verify(messages: list[str], pk: list[G1Element], threshold_sig: str) -> bool:
+    threshold_sig = G2Element.from_bytes(bytes.fromhex(threshold_sig))
+
+    tmp = [ None ] * len(messages)
+
+    for i in range(0, len(messages)):
+        tmp[i] = bytes(messages[i], 'utf8')
+
+    return scheme.aggregate_verify(pk, tmp, threshold_sig)
