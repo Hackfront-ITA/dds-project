@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, popen
 
 from tss import tss_gen_private_key, tss_get_public_key
 
@@ -15,7 +15,7 @@ processes = set([
     for num in range(2, num_hosts + 2)
 ])
 
-cur_process = '172.21.0.3'
+cur_process = popen('/bin/hostname -i').read().strip()
 
 keys = {}
 
