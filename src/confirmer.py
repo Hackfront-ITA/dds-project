@@ -87,7 +87,7 @@ def on_submit_r(instance, sender, value, share, sig):
     instance.light_cert.append((sender, share))
     instance.full_cert.append((sender, 'submit', value, share, sig))
 
-    if len(instance.xfrom) >= num_hosts - max_failures:
+    if len(instance.xfrom) >= num_hosts - max_failures and not instance.confirmed:
         instance.trigger('e_from_over_th')
 
 def on_from_over_th(instance):
