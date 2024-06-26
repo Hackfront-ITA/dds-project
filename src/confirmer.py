@@ -100,22 +100,22 @@ def on_from_over_th(instance):
     combined = tss_combine(shares)
     beb.trigger('send', [ instance.id, 'light-certificate', instance.value, combined, senders ])
 
-def on_light_certificate(instance, sender, value, light_cert, processes):
-    logger.debug(f'[{instance.id}] Received light certificate from {sender}, for {value}, content: {light_cert}, {processes}')
+def on_light_certificate(instance, sender, value, light_cert, participants):
+    logger.debug(f'[{instance.id}] Received light certificate from {sender}, for {value}, content: {light_cert[:16]}..., {participants}')
 
     pk = []
-    for process in processes:
-        pk.append(keys[process][1])
+    for participant in participants:
+        pk.append(keys[participant][1])
 
-    if not tss_verify([ str(value) ] * len(processes), pk, light_cert):
+    if not tss_verify([ str(value) ] * len(participants), pk, light_cert):
         return
 
     # instance.obt_light_certs.append(('light-certificate', value, light_cert))
 
-    for process in processes:
-        instance.lc_dict[process] += 1
+    for participant in participants:
+        instance.lc_dict[participant] += 1
 
-        if instance.lc_dict[process] >= 2 and instance.confirmed and not instance.fc_sent:
+        if instance.lc_dict[participant] >= 2 and instance.confirmed and not instance.fc_sent:
             instance.fc_sent = True
             beb.trigger('send', [ instance.id, 'full-certificate', instance.value, instance.full_cert ])
 
