@@ -33,8 +33,8 @@ class AccountableConfirmer(EventEmitter):
         self.xfrom = []
         self.light_cert = []
         self.full_cert = []
-        self.obt_light_certs = []
-        self.obt_full_certs = []
+        # self.obt_light_certs = []
+        # self.obt_full_certs = []
 
         self.fc_sent = False
         self.detected = False
@@ -110,7 +110,7 @@ def on_light_certificate(instance, sender, value, light_cert, processes):
     if not tss_verify([ str(value) ] * len(processes), pk, light_cert):
         return
 
-    instance.obt_light_certs.append(('light-certificate', value, light_cert))
+    # instance.obt_light_certs.append(('light-certificate', value, light_cert))
 
     for process in processes:
         instance.lc_dict[process] += 1
@@ -125,7 +125,7 @@ def on_full_certificate(instance, sender, value, full_cert):
     if not full_cert_valid(full_cert, value):
         return
 
-    instance.obt_full_certs.append(full_cert)
+    # instance.obt_full_certs.append(full_cert)
 
     if instance.detected:
         return
