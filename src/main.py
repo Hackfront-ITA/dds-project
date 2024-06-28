@@ -3,7 +3,7 @@ from logging import basicConfig, getLogger
 from signal import signal, SIGINT, SIGTERM
 from threading import Event
 
-from config import cur_process, log_level
+from config import cur_process, is_byzantine, log_level
 from network import net_start, net_stop
 
 basicConfig(format='%(asctime)s: %(levelname)s: %(name)s: %(message)s', level=log_level)
@@ -21,7 +21,11 @@ logger.info(f'Process started, process id: {cur_process}')
 
 net_start()
 
-import test_confirmer
+if is_byzantine:
+    import proc_byzantine
+else:
+    import proc_correct
+
 exit.wait()
 
 net_stop()
