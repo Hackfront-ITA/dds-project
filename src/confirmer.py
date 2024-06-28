@@ -71,15 +71,19 @@ def on_submit_r(instance, sender, value, share, sig):
 
     raw = 'submit' + str(value) + share
     if not tss_share_verify(raw, keys[sender][1], sig):
+        logger.warn(f'[{instance.id}] Invalid submit message signature, from {sender}')
         return
 
     if not tss_share_verify(str(value), keys[sender][1], share):
+        logger.warn(f'[{instance.id}] Invalid submit share, from {sender}')
         return
 
     if value != instance.value:
+        logger.warn(f'[{instance.id}] Invalid submit value, from {sender}')
         return
 
     if sender in instance.xfrom:
+        logger.warn(f'[{instance.id}] Duplicate submit message, from {sender}')
         return
 
     instance.xfrom.append(sender)
@@ -108,6 +112,7 @@ def on_light_certificate(instance, sender, value, light_cert, participants):
         pk.append(keys[participant][1])
 
     if not tss_verify([ str(value) ] * len(participants), pk, light_cert):
+        logger.warn(f'[{instance.id}] Invalid light cert signature, from {sender}')
         return
 
     # instance.obt_light_certs.append(('light-certificate', value, light_cert))
@@ -123,6 +128,7 @@ def on_full_certificate(instance, sender, value, full_cert):
     logger.debug(f'[{instance.id}] Received full certificate from {sender}, for {value}, content: {full_cert}')
 
     if not full_cert_valid(full_cert, value):
+        logger.warn(f'[{instance.id}] Invalid full cert received from {sender}')
         return
 
     # instance.obt_full_certs.append(full_cert)
@@ -135,6 +141,7 @@ def on_full_certificate(instance, sender, value, full_cert):
 
     for message in full_cert:
         process = message[0]
+
         messages = instance.fc_dict[process]
         messages.append(message)
 
@@ -170,10 +177,13 @@ def full_cert_valid(full_cert, val):
 
         raw = 'submit' + str(value) + share
         if not tss_share_verify(raw, keys[sender][1], sig):
+            logger.warn(f'[{instance.id}] Invalid signature in FC from {sender} about {value}')
             return False
 
         if not tss_share_verify(str(value), keys[sender][1], share):
+            logger.warn(f'[{instance.id}] Invalid share in FC from {sender} about {value}')
             return False
 
         if value != val:
+            logger.warn(f'[{instance.id}] Invalid value in FC from {sender}: {value}')
             return False
