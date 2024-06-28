@@ -1,16 +1,35 @@
 name: dds-project
 
 services:
-  node:
+  byzantine:
     build:
       context: .
     deploy:
       mode: replicated
-      replicas: ${DDS_NUM_HOSTS}
+      replicas: ${DDS_NUM_BYZ}
     env_file: '.env'
+    environment:
+      DDS_IS_BYZANTINE: true
     networks:
       - standard
     user: 1000:1000
+  node:
+    build:
+      context: .
+    depends_on:
+      byzantine:
+        condition: service_started
+        required: true
+    deploy:
+      mode: replicated
+      replicas: ${DDS_NUM_CORRECT}
+    env_file: '.env'
+    environment:
+      DDS_IS_BYZANTINE: false
+    networks:
+      - standard
+    user: 1000:1000
+
 
 networks:
   standard:

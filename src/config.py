@@ -7,7 +7,8 @@ SEED_PREFIX = '1234567890_1234567890_1234567890_'
 log_level = environ['DDS_LOG_LEVEL']
 network = environ['DDS_NETWORK']
 port = int(environ['DDS_PORT'])
-num_hosts = int(environ['DDS_NUM_HOSTS'])
+num_hosts = int(environ['DDS_NUM_CORRECT']) + int(environ['DDS_NUM_BYZ'])
+is_byzantine = environ['DDS_IS_BYZANTINE'] == 'true'
 
 net_prefix = '.'.join(network.split('.')[:-1])
 processes = set([
