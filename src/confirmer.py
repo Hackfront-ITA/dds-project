@@ -1,4 +1,5 @@
 from logging import getLogger
+from time import sleep
 
 from event_emitter import EventEmitter
 from network import BestEffortBroadcast
@@ -16,7 +17,7 @@ ALLOWED_PACKETS = [
 
 instances = {}
 
-max_failures = num_hosts - 1
+max_failures = 4
 
 logger = getLogger(__name__)
 beb = BestEffortBroadcast
@@ -43,8 +44,8 @@ class AccountableConfirmer(EventEmitter):
         self.fc_dict = {}
 
         for process in processes:
-            self.lc_dict[process] = 0
-            self.fc_dict[process] = []
+            self.lc_dict[process] = set()
+            self.fc_dict[process] = set()
 
         self.on('submit', on_submit_l)
 
@@ -57,6 +58,8 @@ def on_submit_l(instance, value):
     logger.debug(f'[{instance.id}] Submitting value {value}')
 
     instance.value = value
+
+    sleep(1)
 
     raw = str(value)
     share = tss_share_sign(raw, keys[cur_process][0])
@@ -88,7 +91,7 @@ def on_submit_r(instance, sender, value, share, sig):
 
     instance.xfrom.append(sender)
 
-    instance.light_cert.append((sender, share))
+    instance.light_cert.append(share)
     instance.full_cert.append((sender, 'submit', value, share, sig))
 
     if len(instance.xfrom) >= num_hosts - max_failures and not instance.confirmed:
@@ -100,9 +103,8 @@ def on_from_over_th(instance):
     instance.confirmed = True
     instance.trigger('confirm', instance.value)
 
-    senders, shares = zip(*instance.light_cert)
-    combined = tss_combine(shares)
-    beb.trigger('send', [ instance.id, 'light-certificate', instance.value, combined, senders ])
+    combined = tss_combine(instance.light_cert)
+    beb.trigger('send', [ instance.id, 'light-certificate', instance.value, combined, instance.xfrom ])
 
 def on_light_certificate(instance, sender, value, light_cert, participants):
     logger.debug(f'[{instance.id}] Received light certificate from {sender}, for {value}, content: {light_cert[:16]}..., {participants}')
@@ -118,9 +120,9 @@ def on_light_certificate(instance, sender, value, light_cert, participants):
     # instance.obt_light_certs.append(('light-certificate', value, light_cert))
 
     for participant in participants:
-        instance.lc_dict[participant] += 1
+        instance.lc_dict[participant].add(value)
 
-        if instance.lc_dict[participant] >= 2 and instance.confirmed and not instance.fc_sent:
+        if len(instance.lc_dict[participant]) >= 2 and instance.confirmed and not instance.fc_sent:
             instance.fc_sent = True
             beb.trigger('send', [ instance.id, 'full-certificate', instance.value, instance.full_cert ])
 
@@ -140,16 +142,20 @@ def on_full_certificate(instance, sender, value, full_cert):
     proof = []
 
     for message in full_cert:
+        message = tuple(message)
         process = message[0]
 
         messages = instance.fc_dict[process]
-        messages.append(message)
+        messages.add(message)
 
         assert(len(messages) <= 2)
 
         if len(messages) == 2:
-            byzantines.append[process]
-            proof.append((messages[0], messages[1]))
+            byzantines.append(process)
+            proof.append(tuple(messages))
+
+    if len(byzantines) == 0:
+        return
 
     instance.detected = True
     instance.trigger('detect', byzantines, proof)
@@ -187,3 +193,5 @@ def full_cert_valid(full_cert, val):
         if value != val:
             logger.warn(f'[{instance.id}] Invalid value in FC from {sender}: {value}')
             return False
+
+    return True
