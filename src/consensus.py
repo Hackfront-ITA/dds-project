@@ -45,15 +45,18 @@ class FloodingConsensus(EventEmitter):
 		self.on('e_correct_in_receivedfrom', on_correct_in_receivedfrom)
 		self.on('m_decided', on_decided)
 
-def on_crash(c, p):
+def on_crash(pfd, p):
 	global correct
 
-	logger.debug(f'[{c.id}] Process {p} is removed from correct')
+	logger.debug(f'Process {p} is removed from correct')
 
 	correct.remove(p)
 
-	if correct <= c.receivedfrom[c.round] and c.decision == None:
-		c.trigger('e_correct_in_receivedfrom')
+	for i_id in instances:
+		c = instances[i_id]
+
+		if correct <= c.receivedfrom[c.round] and c.decision == None:
+			c.trigger('e_correct_in_receivedfrom')
 
 def on_propose(c, v):
 	logger.debug(f'[{c.id}] Proposing value {v}')
@@ -86,10 +89,10 @@ def on_correct_in_receivedfrom(c):
 	else:
 		c.round += 1
 
-		proposals = c.proposals[c.round - 1]
-		logger.debug(f'[{id}] Requesting new round {c.round}, proposals {proposals}')
+		proposals = list(c.proposals[c.round - 1])
+		logger.debug(f'[{c.id}] Requesting new round {c.round}, proposals {proposals}')
 
-		beb.trigger('send', [ id, 'proposal', c.round, proposals])
+		beb.trigger('send', [ c.id, 'proposal', c.round, proposals])
 
 def on_decided(c, p, v):
 	global correct
