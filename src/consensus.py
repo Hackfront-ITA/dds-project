@@ -1,6 +1,7 @@
 from logging import getLogger
 
 from event_emitter import EventEmitter
+from failure_detector import PerfectFailureDetector
 from network import BestEffortBroadcast
 
 from config import network, num_hosts, processes
@@ -17,7 +18,7 @@ correct = set(processes)
 
 logger = getLogger(__name__)
 beb = BestEffortBroadcast
-# pfd = PerfectFailureDetector
+pfd = PerfectFailureDetector()
 
 class FloodingConsensus(EventEmitter):
     def __init__(self):
@@ -44,10 +45,15 @@ class FloodingConsensus(EventEmitter):
         self.on('e_correct_in_receivedfrom', on_correct_in_receivedfrom)
         self.on('m_decided', on_decided)
 
-def on_crash(_, p):
+def on_crash(c, p):
     global correct
 
+    logger.debug(f'[{c.id}] Process {p} is removed from correct')
+
     correct.remove(p)
+
+    if correct <= c.receivedfrom[c.round] and c.decision == None:
+        c.trigger('e_correct_in_receivedfrom')
 
 def on_propose(c, v):
     logger.debug(f'[{c.id}] Proposing value {v}')
@@ -120,4 +126,4 @@ def on_receive(_, source, payload):
     instance.trigger(f'm_{type}', sender, *args)
 
 beb.on('receive', on_receive)
-# pfd.on('crash', on_crash)
+pfd.on('crash', on_crash)
