@@ -6,8 +6,6 @@ from confirmer import AccountableConfirmer
 
 logger = getLogger(__name__)
 
-logger.info('Process is correct!')
-
 confirmer = AccountableConfirmer()
 
 def on_confirm(_, confirmed):
