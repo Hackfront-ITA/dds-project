@@ -1,14 +1,12 @@
 from logging import getLogger
 from random import choice
 
-from config import cur_process
+from config import cur_process, t0_ac
 from confirmer import AccountableConfirmer
-
-T0_AC = 3
 
 logger = getLogger(__name__)
 
-confirmer = AccountableConfirmer(T0_AC)
+confirmer = AccountableConfirmer(t0_ac)
 
 def on_confirm(_, confirmed):
 	logger.info(f'Confirmer confirmed {confirmed}')

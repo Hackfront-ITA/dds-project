@@ -9,6 +9,7 @@ network = environ['DDS_NETWORK']
 port = int(environ['DDS_PORT'])
 num_hosts = int(environ['DDS_NUM_CORRECT']) + int(environ['DDS_NUM_BYZ'])
 is_byzantine = environ['DDS_IS_BYZANTINE'] == 'true'
+t0_ac = int(environ['DDS_T0_AC'])
 
 net_prefix = '.'.join(network.split('.')[:-1])
 processes = set([
