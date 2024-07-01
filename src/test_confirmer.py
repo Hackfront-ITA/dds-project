@@ -4,9 +4,11 @@ from random import choice
 from config import cur_process
 from confirmer import AccountableConfirmer
 
+T0_AC = 3
+
 logger = getLogger(__name__)
 
-confirmer = AccountableConfirmer()
+confirmer = AccountableConfirmer(T0_AC)
 
 def on_confirm(_, confirmed):
     logger.info(f'Confirmer confirmed {confirmed}')

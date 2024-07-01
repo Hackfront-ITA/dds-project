@@ -17,14 +17,14 @@ ALLOWED_PACKETS = [
 
 instances = {}
 
-max_failures = 4
-
 logger = getLogger(__name__)
 beb = BestEffortBroadcast
 
 class AccountableConfirmer(EventEmitter):
-    def __init__(self):
+    def __init__(self, max_failures):
         super().__init__()
+
+		self.max_failures = max_failures
 
         self.id = CLASS_ID
         instances[self.id] = self
@@ -94,7 +94,7 @@ def on_submit_r(instance, sender, value, share, sig):
     instance.light_cert.append(share)
     instance.full_cert.append((sender, 'submit', value, share, sig))
 
-    if len(instance.xfrom) >= num_hosts - max_failures and not instance.confirmed:
+    if len(instance.xfrom) >= num_hosts - instance.max_failures and not instance.confirmed:
         instance.trigger('e_from_over_th')
 
 def on_from_over_th(instance):
