@@ -25,7 +25,25 @@ considered in the evaluation.
 
 ### Setup
 
-Setup
+Customize [.env](./.env) file according to your preferences:
+
+```shell
+DDS_LOG_LEVEL="INFO"  ## Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+DDS_NETWORK="172.21.0.0/16"   ## Subnet used by virtual network
+DDS_PORT="4678"       ## Port used by broadcast module
+
+DDS_NUM_CORRECT="5"   ## Number of correct processes
+DDS_NUM_BYZ="3"       ## Number of byzantine processes
+DDS_T0_AC="3"         ## Max number of failures in confirmer according to paper
+```
+
+To bring up the whole infrastructure a single command is necessary:
+
+```shell
+cd dds-project
+docker compose up
+```
 
 ### Technologies
 
