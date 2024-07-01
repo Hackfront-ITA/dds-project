@@ -12,8 +12,8 @@ is_byzantine = environ['DDS_IS_BYZANTINE'] == 'true'
 
 net_prefix = '.'.join(network.split('.')[:-1])
 processes = set([
-    f'{net_prefix}.{num}'
-    for num in range(2, num_hosts + 2)
+	f'{net_prefix}.{num}'
+	for num in range(2, num_hosts + 2)
 ])
 
 cur_process = popen('/bin/hostname -i').read().strip()
@@ -21,12 +21,12 @@ cur_process = popen('/bin/hostname -i').read().strip()
 keys = {}
 
 for process in processes:
-    keys[process] = [ None, None ]
+	keys[process] = [ None, None ]
 
-    seed = (SEED_PREFIX + process).encode('ascii')
-    private_key = tss_gen_private_key(seed)
+	seed = (SEED_PREFIX + process).encode('ascii')
+	private_key = tss_gen_private_key(seed)
 
-    if process == cur_process:
-        keys[process][0] = private_key
+	if process == cur_process:
+		keys[process][0] = private_key
 
-    keys[process][1] = tss_get_public_key(private_key)
+	keys[process][1] = tss_get_public_key(private_key)

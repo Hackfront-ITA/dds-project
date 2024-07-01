@@ -1,6 +1,6 @@
 from tss import \
-    tss_gen_private_key, tss_get_public_key, tss_share_sign, \
-    tss_share_verify, tss_combine, tss_verify
+	tss_gen_private_key, tss_get_public_key, tss_share_sign, \
+	tss_share_verify, tss_combine, tss_verify
 
 sk1 = tss_gen_private_key()
 vk1 = tss_get_public_key(sk1)
