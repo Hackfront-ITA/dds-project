@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 exit = Event()
 
 def signal_handler(sig, frame):
-    exit.set()
+	exit.set()
 
 signal(SIGINT,  signal_handler)
 signal(SIGTERM, signal_handler)
@@ -22,9 +22,11 @@ logger.info(f'Process started, process id: {cur_process}')
 net_start()
 
 if is_byzantine:
-    import proc_byzantine
+	logger.info('Process is byzantine!')
+	import proc_byzantine
 else:
-    import proc_correct
+	logger.info('Process is correct!')
+	import test_consensus
 
 exit.wait()
 

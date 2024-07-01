@@ -8,8 +8,6 @@ from tss import tss_share_sign
 logger = getLogger(__name__)
 beb = BestEffortBroadcast
 
-logger.info('Process is byzantine!')
-
 recv_values = []
 
 def on_receive(_, source, payload):
