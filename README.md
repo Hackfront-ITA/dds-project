@@ -136,16 +136,22 @@ Confirmer test with
 
 #### Performance
 
-Message delay related to our implementation
+According to the referenced paper, the implementation of the Confirmer mechanism for Byzantine detection inevitably introduces a message delay that slows down the performances. This delay arises from the exchange of messages associated with light certificates, the submission round, and full certificates.
+
+In the context of our implementation, we can distinguish between two different scenarios:
 
 ##### Best case
 
+The best-case scenario occurs when there are no conflicting pairs of light certificates, thereby eliminating the need for the exchange of full certificates. In this scenario, $t_0$ faulty processes are considered, resulting in the following message exchange:
+
 No conflicting light certificates, exactly t0 failures -> 2 * (n - t0) messages
-Submit round + light certificate round, sent by n - t0 processes
+Submit round + light certificate round, sent by n - t0 processes $= 2 \cdot (n - t_0) $ messages 
 
 ##### Worst case
 
-Conflicting light certificates, no crash failures but byzantine behavior -> 3 * n messages -> 3 * n * n packets
+The worst-case scenario occurs when conflicting pairs of light certificates are detected due to the presence of Byzantine processes that send two different values without experiencing crash failures. This situation necessitates the broadcast of full certificates, resulting in the following overhead:
+
+Submit round + light certificate round + full certificate round, sent by n processes $= 3 \cdot n $ messages $= 3 \cdot n \cdot n $ packets
 
 #### Availability
 
