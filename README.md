@@ -47,7 +47,15 @@ docker compose up
 
 ### Technologies
 
-Prova
+This project uses Docker to create a virtual environment, with correct processes and byzantine processes, that communicate together via a virtual network.
+
+Everything is described in [docker-compose.yml](./docker-compose.yml) file.
+
+For the code part, we used Python as it is a powerful language.
+
+- Docker (with compose)
+- Python
+- TSS using blspy (binding for blst in C)
 
 ### Implementation
 
@@ -81,17 +89,34 @@ Every node listens to the broadcast address and a fixed port defined in [.env](.
 
 Events coming from and to the BeB component carry also some parameters, which are serialized/de-serialized using JSON to build the packet payload.
 
-Also, since difference components use the same BeB component, to differentiate between its users, a "class id" is added as an header in the packet.
+Also, since different components use the same BeB component, to differentiate between its users, a "class id" is added to the packet as an header.
 
-There is an issue: packet size, so its payload, is limited by the MTU of the network interface, which typically is 1500. Since we use a virtual interface, we can increase a bit the MTU and don't care about this limitation for our experiments.
+There is an issue: packet size, so its payload, is limited by the MTU of the network interface, which typically is 1500 bytes. Since we use a virtual interface, we can increase a bit the MTU and don't care about this limitation for our experiments.
 
-#### Threshold signature scheme
+#### Key exchange
 
-TSS using BLS
+The TSS scheme that we use requires that every process has its own private key (to sign messages) and the public key of every other process (to verify signatures).
+
+To quickly allow all the processes to have this information, not taking into account privacy issues, each process in [config.py](./src/config.py):
+
+- Generates the list of running processes, identified by their IPv4 address
+- Uses them as a seed to generate every process private key
+- For each of them derives the public key and stores them in an dictionary indexed by process address
+
+For all processes, except the current process, the private key is discarded. In this way every process has the same set of public key, but the private key for only itself.
+
+#### Certificate conflict checking
+To check conflicts between light certificates, a dictionary is used to store for each process the set of values that it has confirmed.
+
+#### TEST
+- From array in light certificates
 
 ### Experiments
 
-Prova
+Confirmer test with
+- 2 different values and 3 byzantines
+- Some hosts not available (crashed or different values proposed)
+
 
 ### Dependability evaluation
 
