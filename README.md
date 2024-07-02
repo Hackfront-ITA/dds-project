@@ -51,7 +51,43 @@ Prova
 
 ### Implementation
 
-Prova
+A (correct) node process is composed of four components, that communicate together via an event-based interface.
+
+- Confirmer
+- Consensus
+- Failure detector
+- Best effort broadcast
+
+#### Event-based interface
+
+Every component is a derived class from an [ObjectWithEvents](https://stackoverflow.com/a/6158658) class, from which it inherits the `on()` and `trigger()` methods.
+The purpose is to make the code as similar as possible to the pseudo-code provided by the study material and the ABC paper.
+
+An example of the API provided by the ObjectWithEvents class:
+```python
+def on_decision(_, decision):
+	logger.info(f'Consensus decided {decision}')
+
+consensus.on('decide', on_decision)
+
+consensus.trigger('propose', value)
+```
+
+#### Best effort broadcast
+
+Virtually every component that we use needs an underlying best effort broadcast primitive.
+We implemented BeB on top of UDP. Simply when it receives a `send` event it broadcast an UDP packet to the broadcast address of the subnet, so it reaches every host in it.
+Every node listens to the broadcast address and a fixed port defined in [.env](./.env) file. When a packet arrives, a `receive` event is triggered, to signal all the listening components.
+
+Events coming from and to the BeB component carry also some parameters, which are serialized/de-serialized using JSON to build the packet payload.
+
+Also, since difference components use the same BeB component, to differentiate between its users, a "class id" is added as an header in the packet.
+
+There is an issue: packet size, so its payload, is limited by the MTU of the network interface, which typically is 1500. Since we use a virtual interface, we can increase a bit the MTU and don't care about this limitation for our experiments.
+
+#### Threshold signature scheme
+
+TSS using BLS
 
 ### Experiments
 
