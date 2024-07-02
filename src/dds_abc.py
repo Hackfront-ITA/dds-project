@@ -13,6 +13,9 @@ class ABC(EventEmitter):
 		ac = self.ac
 		bc = self.bc
 
+		self.bc.ac = ac
+		self.ac.abc = abc
+
 		abc.on('propose', on_propose)
 		bc.on('decide', on_decide)
 		ac.on('confirm', on_confirm)
@@ -27,9 +30,9 @@ def on_decide(instance, decision):
 	ac.trigger('submit', decision)
 
 def on_confirm(instance, confirmation):
-	abc = instance
+	abc = instance.abc
 	abc.trigger('decide', confirmation)
 
 def on_detect(instance, byzantines, proof):
-	abc = instance
+	abc = instance.abc
 	abc.trigger('detect', byzantines, proof)
