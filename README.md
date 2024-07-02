@@ -144,8 +144,7 @@ In the context of our implementation, we can distinguish between two different s
 
 The best-case scenario occurs when there are no conflicting pairs of light certificates, thereby eliminating the need for the exchange of full certificates. In this scenario, $t_0$ faulty processes are considered, resulting in the following message exchange:
 
-No conflicting light certificates, exactly t0 failures -> 2 * (n - t0) messages
-Submit round + light certificate round, sent by n - t0 processes $= 2 \cdot (n - t_0) $ messages 
+Submit round + light certificate round, sent by n - t0 processes $= 2 \cdot (n - t_{0}) $ messages 
 
 ##### Worst case
 
