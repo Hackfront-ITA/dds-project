@@ -19,7 +19,7 @@ def on_detect(_, processes, proof):
 
 consensus.on('detect', on_detect)
 
-sleep(1)
+sleep(3)
 
 value = randint(10000, 99999)
 consensus.trigger('propose', value)
