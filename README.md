@@ -103,13 +103,27 @@ To quickly allow all the processes to have this information, not taking into acc
 - Uses them as a seed to generate every process private key
 - For each of them derives the public key and stores them in an dictionary indexed by process address
 
-For all processes, except the current process, the private key is discarded. In this way every process has the same set of public key, but the private key for only itself.
+For all processes, except the current process, the private key is discarded. In this way every process has the same set of public key, but the corresponding private key for only itself.
+
+#### Light certificate message
+One difference between the paper and our implementation is the content of the light certificate message.
+
+While in the paper the light certificate consists only of the combined signature, in the TSS scheme that we use this is not enough for validation.
+
+In addition, an ordered list of public keys of the participating processes is required. To address this, we included the instance *from* array within the light certificate message, that contain the process list in the necessary order.
+
+The process then builds the PK array by mapping every process with their public key.
 
 #### Certificate conflict checking
 To check conflicts between light certificates, a dictionary is used to store for each process the set of values that it has confirmed.
 
-#### TEST
-- From array in light certificates
+As a new light certificate arrives, the validity of certificate is checked, otherwise discarded.
+Then, for each process contained in it, we add to its set in the dictionary the value associated to the certificate.
+If there is a set in the dictionary that has more than one value, it is for sure a byzantine process, so the the full certificate is sent and the confirmer algorithm continues.
+
+We removed the array of obtained light certificates that was included in the paper because it was no longer useful.
+
+An analogous technique is used for the full certificates, but instead of using sets of values we use sets of messages, but the check is basically the same.
 
 ### Experiments
 
@@ -155,6 +169,7 @@ Availability of nodes in series: $A_{series} = \prod{A_i}$
 
 Availability of the system:
 $$ A_t = 1 - [ \prod_{s \in support}{(1 - A_s)} ] \cdot [ 1 - \prod_{c \in core}{A_c} ] $$
+
 $$ A_t = 1 - [ {(1 - A)}^{t_0} ] \cdot [ 1 - {A}^{n - t_0} ] $$
 
 
