@@ -110,6 +110,8 @@ Conflicting light certificates, no crash failures but byzantine behavior -> 3 * 
 
 #### Availability
 
+![Availability diagram](./res/availability.png "Availability diagram")
+
 t0 <= ceil(n/3) - 1 (tre gruppi A, B, C a pagina 8 destra in fondo)
 
 99.99 % globale -> formula in parallelo inversa -> availability del singolo processo
