@@ -47,15 +47,13 @@ docker compose up
 
 ### Technologies
 
-This project uses Docker to create a virtual environment, with correct processes and byzantine processes, that communicate together via a virtual network.
+This project uses Docker to create a virtual environment, containing both correct processes and byzantine processes, that communicate together via a virtual network.
 
-Everything is described in [docker-compose.yml](./docker-compose.yml) file.
+Everything needed to setup the infrastructure is described in [docker-compose.yml](./docker-compose.yml) file, for an easy [setup](#setup).
 
 For the code part, we used Python as it is a powerful language.
 
-- Docker (with compose)
-- Python
-- TSS using blspy (binding for blst in C)
+The paper also requires a threshold signature scheme (TSS). For this purpose we chose BLS algorithm, since it has robust Python bindings, available on PIP in the [blspy](https://pypi.org/project/blspy) package.
 
 ### Implementation
 
@@ -65,6 +63,8 @@ A (correct) node process is composed of four components, that communicate togeth
 - Consensus
 - Failure detector
 - Best effort broadcast
+
+![Component diagram](./res/components.png "Component diagram")
 
 #### Event-based interface
 
@@ -127,6 +127,8 @@ An analogous technique is used for the full certificates, but instead of using s
 
 ### Experiments
 
+** TODO **
+
 Confirmer test with
 - 2 different values and 3 byzantines
 - Some hosts not available (crashed or different values proposed)
@@ -144,13 +146,13 @@ In the context of our implementation, we can distinguish between two different s
 
 The best-case scenario occurs when there are no conflicting pairs of light certificates, thereby eliminating the need for the exchange of full certificates. In this scenario, $t_0$ faulty processes are considered, resulting in the following message exchange:
 
-Submit round + light certificate round, sent by n - t0 processes $= 2 \cdot (n - t_{0}) $ messages 
+Submit round + light certificate round, sent by n - t0 processes $= 2 \cdot (n - t_{0})$ messages
 
 ##### Worst case
 
 The worst-case scenario occurs when conflicting pairs of light certificates are detected due to the presence of Byzantine processes that send two different values without experiencing crash failures. This situation necessitates the broadcast of full certificates, resulting in the following overhead:
 
-Submit round + light certificate round + full certificate round, sent by n processes $= 3 \cdot n $ messages $= 3 \cdot n \cdot n $ packets
+Submit round + light certificate round + full certificate round, sent by n processes $= 3 \cdot n$ messages $= 3 \cdot n \cdot n$ packets
 
 #### Availability
 
@@ -173,9 +175,12 @@ Availability of nodes in parallel: $A_{parallel} = 1 - [ \prod{(1 - A_i)} ]$
 Availability of nodes in series: $A_{series} = \prod{A_i}$
 
 Availability of the system:
+
 $$ A_t = 1 - [ \prod_{s \in support}{(1 - A_s)} ] \cdot [ 1 - \prod_{c \in core}{A_c} ] $$
 
 $$ A_t = 1 - [ {(1 - A)}^{t_0} ] \cdot [ 1 - {A}^{n - t_0} ] $$
 
+
+** TODO **
 
 t0 <= ceil(n/3) - 1 (tre gruppi A, B, C a pagina 8 destra in fondo)
