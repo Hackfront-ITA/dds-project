@@ -57,11 +57,11 @@ The paper also requires a threshold signature scheme (TSS). For this purpose we 
 
 ### Implementation
 
-A (correct) node process is composed of four components, that communicate together via an event-based interface.
+A (correct) process is composed of four components, that communicate together via an event-based interface.
 
 - Confirmer
 - Consensus
-- Failure detector
+- Failure detector (required by flooding consensus)
 - Best effort broadcast
 
 ![Component diagram](./res/components.png "Component diagram")
@@ -127,12 +127,28 @@ An analogous technique is used for the full certificates, but instead of using s
 
 ### Experiments
 
-** TODO **
+We made some experiments with the confirmer module, in particular we tried to interfere with the confirmation using byzantine processes.
 
-Confirmer test with
-- 2 different values and 3 byzantines
-- Some hosts not available (crashed or different values proposed)
+#### Crash faults
 
+Without byzantines, only the value submitted by at least $n - t_0$ processes is confirmed by them, out of the multiple values submitted. Other values are not confirmed because they are submitted by no more than $t_0$ processes. A process does not submit more than one value, so there are at most $n$ submit messages.
+
+We tested the behavior of the confirmer in the presence of crash faults, by starting only some of the correct processes (Out of 7 processes, first with 5 and then with 3).
+All of them propose a single value, 1234.
+
+As expected, the processes succeed in confirming the value only if the number of faulty (crashed) processes does not exceed $t_0 = 2$, so only in the first case (5 working processes).
+
+#### Byzantine behavior
+
+Our byzantine nodes are initially considered as correct processes, with each having a private key and every other process having their corresponding public keys, exactly like correct processes do.
+
+Their behavior is to echo all submit messages that other processes send, but replacing the signatures of the value with their own.
+
+With byzantines, more than one value can be confirmed, as there is no guarantee that only a single value has $n - t_0$ submit messages. The confirmer however should detect this behaviour.
+
+To test this, we created a network of 7 nodes: 4 correct processes and 3 byzantines. Half of the correct processes propose a value (1234) while the other half proposes another value (9876). We considered $t_0 = ceil(\frac{n}{3}) - 1 = 2$.
+
+To confirm a value, a correct process needs $n - t_0 = 5$ submit messages, so in this test run every correct process succeeds in confirming its proposed value, thanks to the byzantines that broadcast a submit message both for 1234 and 9876. In fact, the confirmer detects the three byzantine processes succesfully, with proof of culpability which is the set of conflicting submit messages.
 
 ### Dependability evaluation
 
@@ -180,6 +196,7 @@ $$ A_t = 1 - [ \prod_{s \in support}{(1 - A_s)} ] \cdot [ 1 - \prod_{c \in core}
 
 $$ A_t = 1 - [ {(1 - A)}^{t_0} ] \cdot [ 1 - {A}^{n - t_0} ] $$
 
+For example, with $n = 10$, $t0 = 3$, $A = 70 \%$ we have a system availability $A_t = 97.5 \%$
 
 ** TODO **
 
