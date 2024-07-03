@@ -1,5 +1,5 @@
 # Accountable Byzantine Consensus
-Project for Dependable Distributed Systems course
+Project for Dependable Distributed Systems course, A.Y. 2023/2024
 
 ### People
 - [Alessandro Cecchetto](https://github.com/Ale110901) -- 1941039
@@ -7,7 +7,7 @@ Project for Dependable Distributed Systems course
 
 ### Links
 - [Repository on GitHub](https://github.com/Hackfront-ITA/dds-project)
-- [Presentation](https://github.com/Hackfront-ITA/dds-project/blob/main/docs/presentation.pdf)
+- [Presentation](./docs/presentation.pdf)
 
 ### Project description
 The goal of the project is to implement an accountable consensus primitive based on this [paper](https://doi.org/10.1016/j.jpdc.2023.104743) ([archived](./docs/paper.pdf)).
@@ -49,11 +49,11 @@ docker compose up
 
 ## 2. Technologies
 
-This project uses Docker to create a virtual environment, containing both correct processes and byzantine processes, that communicate together via a virtual network.
+This project uses Docker to ensure the reproducibility of the environment, and Compose to create a virtual infrastructure, containing both correct processes and byzantine processes, that communicate together via a virtual network.
 
 Everything needed to setup the infrastructure is described in [docker-compose.yml](./docker-compose.yml) file, for an easy [setup](#1-setup).
 
-For the code part, we used Python as it is a powerful language.
+For the code part, we used Python due to its similarity to pseudocode.
 
 The paper also requires a threshold signature scheme (TSS). For this purpose we chose BLS algorithm, since a good implementation is available on PIP in the [blspy](https://pypi.org/project/blspy) package.
 
